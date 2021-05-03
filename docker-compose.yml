@@ -1,0 +1,6 @@
+version: "3"
+services:
+    humberto:
+        build: .
+        environment:
+            TOKEN: token_hierzo
