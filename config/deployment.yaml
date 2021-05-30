@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: humberto
+  labels:
+    app: humberto
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: humberto
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  minReadySeconds: 5
+  template:
+    metadata:
+      labels:
+        app: humberto
+    spec:
+      containers:
+      - name: humberto
+        image: <IMAGE>
+        env:
+        - name: TOKEN
+          value: <BOT_TOKEN>
+        ports:
+        - containerPort: 8000
+        resources:
+          requests:
+            cpu: 100m
+          limits:
+            cpu: 100m
+      imagePullSecrets:
+      - name: <GITHUB_TOKEN>

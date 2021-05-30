@@ -1,8 +1,14 @@
-name: Publish Docker image
+name: Deploy to Kubernetes cluster
 on:
   push:
     branches:
       - master
+    paths:
+      - 'Dockerfile'
+      - '.github/workflows/**'
+      - 'config/**'
+      - 'src/**'
+
 jobs:
   push_to_registry:
     runs-on: ubuntu-latest
@@ -20,3 +26,19 @@ jobs:
         with:
           push: true
           tags: ghcr.io/${{ github.repository }}/humberto:${{ github.sha }}
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+      - name: Inject new docker image into deployment
+        run: sed -i 's|<IMAGE>|ghcr.io/${{ github.repository }}/humberto:${{ github.sha }}|' $GITHUB_WORKSPACE/config/deployment.yml
+      - name: Inject bot secret into deployment
+        run: sed -i 's|<BOT_TOKEN>|${{ secrets.BOT_TOKEN }}|' $GITHUB_WORKSPACE/config/deployment.yml
+      - name: Inject github token into deployment
+        run: sed -i 's|<GITHUB_TOKEN>|${{ secrets.GITHUB_TOKEN }}|' $GITHUB_WORKSPACE/config/deployment.yml
+      - name: Save DigitalOcean kubeconfig
+        run: doctl kubernetes cluster kubeconfig save --expiry-seconds 600 humberto
+      - name: Deploy to DigitalOcean Kubernetes
+        run: kubectl apply -f $GITHUB_WORKSPACE/config/deployment.yml
+      - name: Verify deployment
+        run: kubectl rollout status deployment/humberto
