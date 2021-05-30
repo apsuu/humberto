@@ -31,7 +31,7 @@ jobs:
         with:
           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
       - name: Inject new docker image into deployment
-        run: sed -i 's|<IMAGE>|ghcr.io/${{ github.repository }}/humberto:${{ github.sha }}|' $GITHUB_WORKSPACE/config/deployment.yml
+        run: sed -i 's|<IMAGE>|ghcr.io/${{ github.repository }}/humberto:${{ github.sha }}|' $GITHUB_WORKSPACE/config/deployment.yaml
       - name: Inject bot secret into deployment
         run: sed -i 's|<BOT_TOKEN>|${{ secrets.BOT_TOKEN }}|' $GITHUB_WORKSPACE/config/deployment.yml
       - name: Inject github token into deployment
